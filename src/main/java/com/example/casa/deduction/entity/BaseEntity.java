@@ -29,7 +29,7 @@ public abstract class BaseEntity {
 
 	
 	@CreatedBy
-	//@Column( nullable = false, updatable = false)
+	@Column( nullable = false, updatable = false)
     private String createdBy;
 
 	@Column( nullable = false, updatable = false)
