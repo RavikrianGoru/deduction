@@ -4,8 +4,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @Configuration
-@EnableJpaAuditing(auditorAwareRef = "auditAwareImpl")
+@EnableJpaAuditing
+//@EnableJpaAuditing(auditorAwareRef = "auditAwareImpl")
+//This is used for custom auditing, implemented in AuditAwareImpl
 public class AuditConfig {
-	//This is used for custom auditing, implemented in AuditAwareImpl
+	
 	
 }
