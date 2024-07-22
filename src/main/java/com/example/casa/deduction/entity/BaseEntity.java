@@ -8,36 +8,39 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 
-@Getter
-@Setter
-//@Entity
+@Data
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class AuditableEntity {
+public abstract class BaseEntity {
 
-//	@Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
+	// Below field is optional
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+	
 	@CreatedBy
+	@Column( nullable = false, updatable = false)
     private String createdBy;
 
+	@Column( nullable = false, updatable = false)
     @CreatedDate
     private LocalDateTime createdDate;
 
+	@Column(insertable=false)
     @LastModifiedBy
     private String lastModifiedBy;
 
+	@Column(insertable=false)
     @LastModifiedDate
     private LocalDateTime lastModifiedDate;
 }
