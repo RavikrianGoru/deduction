@@ -82,3 +82,200 @@ logger.AUDIT.additivity = false
 logger.AUDIT.appenderRef.auditLog.ref = AuditLog
 
 
+
+
+=========
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <exclusions>
+            <exclusion>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-log4j2</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.zalando</groupId>
+        <artifactId>logbook-spring-boot-starter</artifactId>
+        <version>2.13.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-aop</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <optional>true</optional>
+    </dependency>
+</dependencies>
+
+============
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <RollingFile name="AppLog" fileName="target/logs/application.log"
+                     filePattern="target/logs/application-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+        <RollingFile name="ErrorLog" fileName="target/logs/error.log"
+                     filePattern="target/logs/error-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+            <Filters>
+                <ThresholdFilter level="error"/>
+            </Filters>
+        </RollingFile>
+        <RollingFile name="AuditLog" fileName="target/logs/audit.log"
+                     filePattern="target/logs/audit-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AppLog"/>
+            <AppenderRef ref="ErrorLog"/>
+        </Root>
+        <Logger name="AUDIT" level="info" additivity="false">
+            <AppenderRef ref="AuditLog"/>
+        </Logger>
+    </Loggers>
+</Configuration>
+
+==========
+# Server Configuration
+server.port=8080
+
+# H2 Database Configuration
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+# Hibernate Configuration
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# Logging Configuration
+logging.config=classpath:log4j2.xml
+
+# Log Levels
+logging.level.root=info
+logging.level.org.springframework.web=debug
+
+==============
+package com.example.casa.deduction.config;
+
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StopWatch;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Aspect
+@Configuration
+@Slf4j
+public class LoggingAspectConfig {
+
+    private static final org.apache.logging.log4j.Logger auditLogger = org.apache.logging.log4j.LogManager.getLogger("AUDIT");
+
+    @Around("execution(* com.example.casa.deduction.controller..*(..))")
+    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
+        Object proceed = joinPoint.proceed();
+
+        stopWatch.stop();
+        long executionTime = stopWatch.getTotalTimeMillis();
+
+        String methodName = joinPoint.getSignature().getName();
+        Object[] args = joinPoint.getArgs();
+        String requestPayload = args != null ? args.toString() : "No payload";
+
+        Object response = proceed instanceof ResponseEntity ? ((ResponseEntity<?>) proceed).getBody() : proceed;
+        String responsePayload = response != null ? response.toString() : "No response";
+
+        Map<String, Object> logDetails = new HashMap<>();
+        logDetails.put("method", methodName);
+        logDetails.put("requestPayload", requestPayload);
+        logDetails.put("responsePayload", responsePayload);
+        logDetails.put("executionTime", executionTime + "ms");
+
+        log.info("Method: {} | Execution Time: {} ms", methodName, executionTime);
+        auditLogger.info("Audit Log: {}", logDetails);
+
+        return proceed;
+    }
+
+    @AfterThrowing(pointcut = "execution(* com.example.casa.deduction.controller..*(..))", throwing = "exception")
+    public void logAfterThrowing(Throwable exception) {
+        log.error("Exception in method execution: {}", exception.getMessage());
+        auditLogger.error("Exception Details: ", exception);
+    }
+}
+
+============
+package com.example.casa.deduction.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.zalando.logbook.Logbook;
+import org.zalando.logbook.json.JsonHttpLogFormatter;
+import org.zalando.logbook.json.JsonHttpLogWriter;
+import org.zalando.logbook.spring.LogbookAutoConfiguration;
+
+@Configuration
+public class LogbookConfig {
+
+    @Bean
+    public Logbook logbook() {
+        return Logbook.builder()
+                .formatter(new JsonHttpLogFormatter())
+                .writer(new JsonHttpLogWriter())
+                .build();
+    }
+}
+=============
