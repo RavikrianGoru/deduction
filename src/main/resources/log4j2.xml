@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration status="WARN" monitorInterval="30">
     <Appenders>
         <!-- Application Log -->
         <RollingFile name="AppLog" fileName="target/logs/application.log" filePattern="target/logs/application-%d{yyyy-MM-dd}-%i.log.gz">
@@ -11,7 +11,7 @@
             <DefaultRolloverStrategy max="10"/>
         </RollingFile>
 
-        <!-- Exception/Error Log -->
+        <!-- Error Log -->
         <RollingFile name="ErrorLog" fileName="target/logs/error.log" filePattern="target/logs/error-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n" />
             <Policies>
@@ -38,23 +38,34 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n" />
         </Console>
+
+        <!-- Async Appenders -->
+        <Async name="AsyncAppLog">
+            <AppenderRef ref="AppLog"/>
+        </Async>
+        <Async name="AsyncErrorLog">
+            <AppenderRef ref="ErrorLog"/>
+        </Async>
+        <Async name="AsyncAuditLog">
+            <AppenderRef ref="AuditLog"/>
+        </Async>
     </Appenders>
 
     <Loggers>
         <!-- Root Logger -->
         <Root level="info">
-            <AppenderRef ref="AppLog"/>
+            <AppenderRef ref="AsyncAppLog"/>
             <AppenderRef ref="Console"/>
         </Root>
 
         <!-- Exception/Error Logger -->
         <Logger name="org.springframework.boot" level="error">
-            <AppenderRef ref="ErrorLog"/>
+            <AppenderRef ref="AsyncErrorLog"/>
         </Logger>
 
         <!-- Audit Logger -->
         <Logger name="AUDIT" level="info" additivity="false">
-            <AppenderRef ref="AuditLog"/>
+            <AppenderRef ref="AsyncAuditLog"/>
         </Logger>
     </Loggers>
 </Configuration>
