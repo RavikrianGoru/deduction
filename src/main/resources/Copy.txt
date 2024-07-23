@@ -1,160 +1,84 @@
-# Server Configuration
-server.port=8080
+====application.properties=========add
+# Log4j2 Configuration
+logging.config=classpath:log4j2.properties
 
-# H2 Database Configuration
-spring.datasource.url=jdbc:h2:mem:testdb
-spring.datasource.driverClassName=org.h2.Driver
-spring.datasource.username=sa
-spring.datasource.password=
-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
-spring.h2.console.enabled=true
-spring.h2.console.path=/h2-console
-
-# Hibernate Configuration
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-
-# Logging Configuration
-logging.level.root=info
-logging.level.org.springframework.web=debug
+# Log File Location
 logging.file.name=target/logs/application.log
 logging.file.path=target/logs
 
+
+
+=====log4j2.properties
 # Log4j2 Configuration
-logging.log4j2.level=info
-logging.log4j2.rootLogger.level=info
-logging.log4j2.rootLogger.appenderRefs=appLog
-logging.log4j2.rootLogger.appenderRef.appLog.ref=AsyncAppLog
-logging.log4j2.rootLogger.appenderRef.console.ref=Console
 
-# Application Log
-logging.log4j2.appender.appLog.type=RollingFile
-logging.log4j2.appender.appLog.name=AppLog
-logging.log4j2.appender.appLog.fileName=target/logs/application.log
-logging.log4j2.appender.appLog.filePattern=target/logs/application-%d{yyyy-MM-dd}-%i.log.gz
-logging.log4j2.appender.appLog.layout.type=PatternLayout
-logging.log4j2.appender.appLog.layout.pattern=%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
-logging.log4j2.appender.appLog.policies.type=Policies
-logging.log4j2.appender.appLog.policies.time.type=TimeBasedTriggeringPolicy
-logging.log4j2.appender.appLog.policies.time.interval=1
-logging.log4j2.appender.appLog.policies.time.modulate=true
-logging.log4j2.appender.appLog.policies.size.type=SizeBasedTriggeringPolicy
-logging.log4j2.appender.appLog.policies.size.size=10MB
-logging.log4j2.appender.appLog.strategy.type=DefaultRolloverStrategy
-logging.log4j2.appender.appLog.strategy.max=10
+# Root Logger
+rootLogger.level = info
+rootLogger.appenderRef.stdout.ref = Console
+rootLogger.appenderRef.file.ref = AppLog
+rootLogger.appenderRef.error.ref = ErrorLog
 
-# Error Log
-logging.log4j2.logger.org.springframework.boot.level=error
-logging.log4j2.logger.org.springframework.boot.appenderRefs=errorLog
-logging.log4j2.logger.org.springframework.boot.appenderRef.errorLog.ref=AsyncErrorLog
-logging.log4j2.appender.errorLog.type=RollingFile
-logging.log4j2.appender.errorLog.name=ErrorLog
-logging.log4j2.appender.errorLog.fileName=target/logs/error.log
-logging.log4j2.appender.errorLog.filePattern=target/logs/error-%d{yyyy-MM-dd}-%i.log.gz
-logging.log4j2.appender.errorLog.layout.type=PatternLayout
-logging.log4j2.appender.errorLog.layout.pattern=%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
-logging.log4j2.appender.errorLog.policies.type=Policies
-logging.log4j2.appender.errorLog.policies.time.type=TimeBasedTriggeringPolicy
-logging.log4j2.appender.errorLog.policies.time.interval=1
-logging.log4j2.appender.errorLog.policies.time.modulate=true
-logging.log4j2.appender.errorLog.policies.size.type=SizeBasedTriggeringPolicy
-logging.log4j2.appender.errorLog.policies.size.size=10MB
-logging.log4j2.appender.errorLog.strategy.type=DefaultRolloverStrategy
-logging.log4j2.appender.errorLog.strategy.max=10
-logging.log4j2.appender.errorLog.filters=threshold
-logging.log4j2.appender.errorLog.filter.threshold.type=ThresholdFilter
-logging.log4j2.appender.errorLog.filter.threshold.level=error
+# Appenders
+appender.console.type = Console
+appender.console.name = Console
+appender.console.target = SYSTEM_OUT
+appender.console.layout.type = PatternLayout
+appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
 
-# Audit Log
-logging.log4j2.logger.AUDIT.level=info
-logging.log4j2.logger.AUDIT.additivity=false
-logging.log4j2.logger.AUDIT.appenderRefs=auditLog
-logging.log4j2.logger.AUDIT.appenderRef.auditLog.ref=AsyncAuditLog
-logging.log4j2.appender.auditLog.type=RollingFile
-logging.log4j2.appender.auditLog.name=AuditLog
-logging.log4j2.appender.auditLog.fileName=target/logs/audit.log
-logging.log4j2.appender.auditLog.filePattern=target/logs/audit-%d{yyyy-MM-dd}-%i.log.gz
-logging.log4j2.appender.auditLog.layout.type=PatternLayout
-logging.log4j2.appender.auditLog.layout.pattern=%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
-logging.log4j2.appender.auditLog.policies.type=Policies
-logging.log4j2.appender.auditLog.policies.time.type=TimeBasedTriggeringPolicy
-logging.log4j2.appender.auditLog.policies.time.interval=1
-logging.log4j2.appender.auditLog.policies.time.modulate=true
-logging.log4j2.appender.auditLog.policies.size.type=SizeBasedTriggeringPolicy
-logging.log4j2.appender.auditLog.policies.size.size=10MB
-logging.log4j2.appender.auditLog.strategy.type=DefaultRolloverStrategy
-logging.log4j2.appender.auditLog.strategy.max=10
+appender.appLog.type = RollingFile
+appender.appLog.name = AppLog
+appender.appLog.fileName = ${logging.file.path}/application.log
+appender.appLog.filePattern = ${logging.file.path}/application-%d{yyyy-MM-dd}-%i.log.gz
+appender.appLog.layout.type = PatternLayout
+appender.appLog.layout.pattern = %d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
+appender.appLog.policies.type = Policies
+appender.appLog.policies.time.type = TimeBasedTriggeringPolicy
+appender.appLog.policies.time.interval = 1
+appender.appLog.policies.time.modulate = true
+appender.appLog.policies.size.type = SizeBasedTriggeringPolicy
+appender.appLog.policies.size.size = 10MB
+appender.appLog.strategy.type = DefaultRolloverStrategy
+appender.appLog.strategy.max = 10
 
-# Console Appender
-logging.log4j2.appender.console.type=Console
-logging.log4j2.appender.console.name=Console
-logging.log4j2.appender.console.target=SYSTEM_OUT
-logging.log4j2.appender.console.layout.type=PatternLayout
-logging.log4j2.appender.console.layout.pattern=%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
+appender.errorLog.type = RollingFile
+appender.errorLog.name = ErrorLog
+appender.errorLog.fileName = ${logging.file.path}/error.log
+appender.errorLog.filePattern = ${logging.file.path}/error-%d{yyyy-MM-dd}-%i.log.gz
+appender.errorLog.layout.type = PatternLayout
+appender.errorLog.layout.pattern = %d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
+appender.errorLog.policies.type = Policies
+appender.errorLog.policies.time.type = TimeBasedTriggeringPolicy
+appender.errorLog.policies.time.interval = 1
+appender.errorLog.policies.time.modulate = true
+appender.errorLog.policies.size.type = SizeBasedTriggeringPolicy
+appender.errorLog.policies.size.size = 10MB
+appender.errorLog.strategy.type = DefaultRolloverStrategy
+appender.errorLog.strategy.max = 10
+appender.errorLog.filters.threshold.type = ThresholdFilter
+appender.errorLog.filters.threshold.level = error
 
-# Async Appenders
-logging.log4j2.appender.AsyncAppLog.type=Async
-logging.log4j2.appender.AsyncAppLog.appenderRef.appLog.ref=AppLog
-logging.log4j2.appender.AsyncErrorLog.type=Async
-logging.log4j2.appender.AsyncErrorLog.appenderRef.errorLog.ref=ErrorLog
-logging.log4j2.appender.AsyncAuditLog.type=Async
-logging.log4j2.appender.AsyncAuditLog.appenderRef.auditLog.ref=AuditLog
+appender.auditLog.type = RollingFile
+appender.auditLog.name = AuditLog
+appender.auditLog.fileName = ${logging.file.path}/audit.log
+appender.auditLog.filePattern = ${logging.file.path}/audit-%d{yyyy-MM-dd}-%i.log.gz
+appender.auditLog.layout.type = PatternLayout
+appender.auditLog.layout.pattern = %d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
+appender.auditLog.policies.type = Policies
+appender.auditLog.policies.time.type = TimeBasedTriggeringPolicy
+appender.auditLog.policies.time.interval = 1
+appender.auditLog.policies.time.modulate = true
+appender.auditLog.policies.size.type = SizeBasedTriggeringPolicy
+appender.auditLog.policies.size.size = 10MB
+appender.auditLog.strategy.type = DefaultRolloverStrategy
+appender.auditLog.strategy.max = 10
+
+# Loggers
+logger.org.springframework.boot.level = error
+logger.org.springframework.boot.additivity = false
+logger.org.springframework.boot.appenderRef.errorLog.ref = ErrorLog
+
+logger.AUDIT.name = AUDIT
+logger.AUDIT.level = info
+logger.AUDIT.additivity = false
+logger.AUDIT.appenderRef.auditLog.ref = AuditLog
 
 
-============
-package com.example.casa.deduction.config;
-
-import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.StopWatch;
-
-import java.util.HashMap;
-import java.util.Map;
-
-@Aspect
-@Configuration
-@Slf4j
-public class LoggingAspectConfig {
-
-    private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
-
-    @Around("execution(* com.example.casa.deduction.controller..*(..))")
-    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-
-        Object proceed = joinPoint.proceed();
-
-        stopWatch.stop();
-        long executionTime = stopWatch.getTotalTimeMillis();
-
-        String methodName = joinPoint.getSignature().getName();
-        Object[] args = joinPoint.getArgs();
-        String requestPayload = args != null ? args.toString() : "No payload";
-
-        Object response = proceed instanceof ResponseEntity ? ((ResponseEntity<?>) proceed).getBody() : proceed;
-        String responsePayload = response != null ? response.toString() : "No response";
-
-        Map<String, Object> logDetails = new HashMap<>();
-        logDetails.put("method", methodName);
-        logDetails.put("requestPayload", requestPayload);
-        logDetails.put("responsePayload", responsePayload);
-        logDetails.put("executionTime", executionTime + "ms");
-
-        log.info("Method: {} | Execution Time: {} ms", methodName, executionTime);
-        auditLogger.info("Audit Log: {}", logDetails);
-
-        return proceed;
-    }
-
-    @AfterThrowing(pointcut = "execution(* com.example.casa.deduction.controller..*(..))", throwing = "exception")
-    public void logAfterThrowing(Throwable exception) {
-        log.error("Exception in method execution: {}", exception.getMessage());
-        auditLogger.error("Exception Details: ", exception);
-    }
-}
